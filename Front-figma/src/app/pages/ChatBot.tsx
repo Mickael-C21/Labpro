@@ -4,52 +4,121 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
-import { 
-  Send, 
-  Bot, 
-  User, 
-  Phone, 
+import {
+  Send,
+  Bot,
+  User,
+  Phone,
   Loader2,
-  Music,
-  Sparkles
+  FlaskConical,
+  Sparkles,
+  FileText
 } from "lucide-react";
 import { ChatMessage } from "../data/instruments";
 
 const categoryMessages: Record<string, string> = {
-  guitares: "Bonjour ! 👋 Je vois que vous vous intéressez aux guitares. Excellent choix ! Je peux vous renseigner sur nos guitares acoustiques, électriques ou classiques. Que recherchez-vous ?",
-  pianos: "Bonjour ! 👋 Bienvenue dans notre espace pianos et claviers ! Je peux vous aider à choisir entre un piano acoustique, numérique ou un synthétiseur. Qu'est-ce qui vous intéresse ?",
-  batteries: "Bonjour ! 👋 Vous vous intéressez aux batteries ? Parfait ! Je peux vous conseiller sur les batteries acoustiques, électroniques ou les percussions. Que souhaitez-vous savoir ?",
-  vents: "Bonjour ! 👋 Les instruments à vent sont magnifiques ! Je peux vous renseigner sur les saxophones, trompettes, flûtes et clarinettes. Qu'est-ce qui vous attire ?",
-  cordes: "Bonjour ! 👋 Les instruments à cordes ont un charme unique ! Je peux vous parler des violons, violoncelles et contrebasses. Que recherchez-vous ?",
-  studio: "Bonjour ! 👋 Vous vous intéressez au matériel studio ? Excellent ! Je peux vous conseiller sur les interfaces audio, microphones et équipements de production. Comment puis-je vous aider ?"
+  autoclaves: "Bonjour ! 👋 Je vois que vous vous intéressez aux autoclaves. Excellent choix ! Je peux vous renseigner sur nos modèles de paillasse, verticaux ou industriels, ou vous préparer un devis. Que recherchez-vous ?",
+  refrigeration: "Bonjour ! 👋 Bienvenue dans notre espace réfrigération de laboratoire ! Je peux vous aider à choisir entre un réfrigérateur, un congélateur -40°C ou une chambre froide de paillasse. Qu'est-ce qui vous intéresse ?",
+  balances: "Bonjour ! 👋 Vous vous intéressez à nos balances de laboratoire ? Parfait ! Je peux vous conseiller sur les balances analytiques, de précision ou compteuses. Que souhaitez-vous savoir ?",
+  mobilier: "Bonjour ! 👋 Le mobilier de laboratoire est essentiel à un poste de travail sûr et efficace ! Je peux vous renseigner sur nos bancs de travail, armoires de sécurité et sièges ergonomiques. Qu'est-ce qui vous intéresse ?",
+  analyseurs: "Bonjour ! 👋 Nos analyseurs et équipements d'analyse couvrent centrifugeuses, incubateurs, bains-marie et analyseurs TOC ou d'humidité. Que recherchez-vous ?",
+  purification: "Bonjour ! 👋 Vous vous intéressez aux systèmes de purification d'eau ? Excellent ! Je peux vous conseiller sur nos gammes type I, type II et osmoseurs. Comment puis-je vous aider ?"
 };
 
 const predefinedQuestions = [
-  "Je cherche une guitare pour débuter",
-  "Quelle est la différence entre un piano acoustique et numérique ?",
-  "Budget pour une batterie électronique ?",
-  "Instruments pour un enfant de 8 ans"
+  "Je voudrais un devis pour un autoclave",
+  "Quels types de réfrigérateurs de laboratoire proposez-vous ?",
+  "Quel est le prix d'une balance analytique ?",
+  "Je cherche un système de purification d'eau"
 ];
+
+// Mots-clés par catégorie de produit
+const categoryKeywords: { id: string; label: string; keywords: string[] }[] = [
+  { id: "autoclaves", label: "autoclaves", keywords: ["autoclave", "stérilis", "stérilisation"] },
+  { id: "refrigeration", label: "réfrigération de laboratoire", keywords: ["réfrigérat", "refrigerat", "frigo", "congélateur", "congelateur", "chambre froide"] },
+  { id: "balances", label: "balances de laboratoire", keywords: ["balance", "pesée", "pesee", "peser"] },
+  { id: "mobilier", label: "mobilier de laboratoire", keywords: ["mobilier", "meuble", "armoire", "paillasse", "banc de travail", "chaise"] },
+  { id: "analyseurs", label: "analyseurs", keywords: ["analyseur", "centrifugeuse", "incubateur", "bain-marie", "bain marie", "toc", "humidité", "humidite"] },
+  { id: "purification", label: "purification d'eau", keywords: ["purification", "eau", "osmose", "osmoseur"] }
+];
+
+const quoteKeywords = ["devis", "prix", "tarif", "coût", "cout", "budget", "combien"];
+const dissatisfactionKeywords = [
+  "non", "pas satisf", "pas utile", "pas la réponse", "pas ce que", "autre chose",
+  "ça ne répond pas", "ca ne repond pas", "insatisf", "toujours pas", "ce n'est pas ça"
+];
+
+interface BotReply {
+  text: string;
+  matched: boolean;
+}
+
+function findCategory(message: string) {
+  return categoryKeywords.find((cat) => cat.keywords.some((kw) => message.includes(kw)));
+}
+
+function generateReply(userMessage: string): BotReply {
+  const lowerMessage = userMessage.toLowerCase();
+
+  const isDissatisfied = dissatisfactionKeywords.some((kw) => lowerMessage.includes(kw));
+  if (isDissatisfied) {
+    return {
+      text: "Je comprends, je ne veux pas vous faire perdre de temps. Le plus simple est qu'un de nos conseillers vous appelle directement pour répondre précisément à votre besoin. Cliquez sur « Demander un appel » ci-contre, ou dites-moi le sujet et je prépare la demande avec vous. 📞",
+      matched: true
+    };
+  }
+
+  const wantsQuote = quoteKeywords.some((kw) => lowerMessage.includes(kw));
+  const category = findCategory(lowerMessage);
+
+  if (wantsQuote && category) {
+    return {
+      text: `Avec plaisir ! Pour établir un devis précis sur nos ${category.label}, j'ai besoin de connaître le modèle qui vous intéresse et votre usage (capacité, fréquence d'utilisation...). Je peux vous mettre en relation avec un conseiller qui vous enverra un devis personnalisé sous 24h. Souhaitez-vous demander un appel ou programmer un rendez-vous ? 📞`,
+      matched: true
+    };
+  }
+
+  if (wantsQuote) {
+    return {
+      text: "Bien sûr, je peux vous aider à obtenir un devis ! Pour quel type d'équipement souhaitez-vous une estimation : autoclave, réfrigération, balance, mobilier, analyseur ou purification d'eau ?",
+      matched: true
+    };
+  }
+
+  if (category) {
+    return {
+      text: `Concernant nos ${category.label}, je peux vous donner des informations générales, comparer des modèles, ou établir un devis personnalisé. Que préférez-vous : en savoir plus sur les modèles disponibles, ou obtenir un devis ?`,
+      matched: true
+    };
+  }
+
+  // Default response when nothing was recognized
+  return {
+    text: "C'est une excellente question ! Pour vous donner la meilleure réponse possible, dites-moi si cela concerne un type d'équipement précis (autoclave, réfrigération, balance, mobilier, analyseur, purification d'eau) ou une demande de devis. Sinon, je vous propose de vous mettre en relation avec un expert. Souhaitez-vous planifier un appel de 15 minutes ? 📞",
+    matched: false
+  };
+}
 
 export function ChatBot() {
   const navigate = useNavigate();
   const location = useLocation();
   const category = location.state?.category;
-  
+
   const initialMessages: ChatMessage[] = [
     {
       id: "1",
       role: "assistant",
-      content: category && categoryMessages[category] 
+      content: category && categoryMessages[category]
         ? categoryMessages[category]
-        : "Bonjour ! 👋 Je suis votre assistant virtuel MusicPro. Je peux vous aider à trouver l'instrument parfait pour vous. Que recherchez-vous aujourd'hui ?",
+        : "Bonjour ! 👋 Je suis l'assistant virtuel LabConnect. Je peux vous renseigner sur nos équipements de laboratoire ou préparer un devis personnalisé. Que recherchez-vous aujourd'hui ?",
       timestamp: new Date()
     }
   ];
-  
+
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [unmatchedCount, setUnmatchedCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -61,34 +130,10 @@ export function ChatBot() {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  const generateResponse = (userMessage: string): string => {
-    const lowerMessage = userMessage.toLowerCase();
-
-    if (lowerMessage.includes("guitare") && lowerMessage.includes("début")) {
-      return "Excellente question ! Pour débuter à la guitare, je vous recommande :\n\n🎸 Guitare acoustique (300-500€) : Son chaleureux, idéale pour apprendre les bases\n🎸 Guitare électrique (400-600€) : Plus facile à jouer, parfaite pour le rock/pop\n\nVoulez-vous que je vous mette en contact avec un conseiller pour un accompagnement personnalisé ? 📞";
-    }
-
-    if (lowerMessage.includes("piano")) {
-      return "Piano acoustique vs numérique :\n\n🎹 Piano acoustique : Son authentique, toucher traditionnel, nécessite de l'espace (à partir de 3000€)\n🎹 Piano numérique : Toucher lourd réaliste, volume réglable, compact (à partir de 500€)\n\nPour quel usage ? Appartement ou maison ? Je peux vous orienter vers le bon choix. Souhaitez-vous un appel avec nos experts ? 📞";
-    }
-
-    if (lowerMessage.includes("batterie")) {
-      return "Pour une batterie électronique, comptez :\n\n🥁 Débutant : 400-800€\n drummer Intermédiaire : 800-1500€\n drummer Pro : 1500€+\n\nLes batteries électroniques sont parfaites pour jouer en appartement ! Voulez-vous discuter avec un spécialiste pour trouver le modèle idéal ? 📞";
-    }
-
-    if (lowerMessage.includes("enfant") || lowerMessage.includes("8 ans")) {
-      return "Pour un enfant de 8 ans, je recommande :\n\n🎵 Guitare 3/4 (taille adaptée)\n🎵 Clavier 61 touches\n🎵 Ukulélé (facile et ludique)\n🎵 Batterie électronique compacte\n\nL'important est de choisir selon ses goûts ! Un de nos conseillers peut vous aider à faire le bon choix. Souhaitez-vous être rappelé ? 📞";
-    }
-
-    // Default response for complex questions
-    return "C'est une excellente question ! Pour vous donner la meilleure réponse possible et des conseils vraiment personnalisés, je vous propose de vous mettre en relation avec un de nos experts. Ils pourront vous guider en fonction de vos besoins précis. Souhaitez-vous planifier un appel de 15 minutes ? 📞";
-  };
-
   const handleSendMessage = async (messageText?: string) => {
     const text = messageText || inputValue.trim();
     if (!text) return;
 
-    // Add user message
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       role: "user",
@@ -100,19 +145,31 @@ export function ChatBot() {
     setInputValue("");
     setIsTyping(true);
 
-    // Simulate AI thinking
     setTimeout(() => {
-      const response = generateResponse(text);
+      const reply = generateReply(text);
+      const nextUnmatched = reply.matched ? 0 : unmatchedCount + 1;
+      setUnmatchedCount(nextUnmatched);
+
+      // Après 2 réponses sans correspondance claire, on pousse fortement vers le RDV
+      const finalText =
+        nextUnmatched >= 2
+          ? "Je n'arrive pas à identifier précisément votre besoin par ici. Le plus efficace est qu'un conseiller vous rappelle directement — cliquez sur « Demander un appel » ci-contre, je vous y redirige tout de suite. 📞"
+          : reply.text;
+
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: response,
+        content: finalText,
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, assistantMessage]);
       setIsTyping(false);
-    }, 1500);
+
+      if (nextUnmatched >= 2) {
+        setUnmatchedCount(0);
+      }
+    }, 1200);
   };
 
   const handleQuickQuestion = (question: string) => {
@@ -120,12 +177,11 @@ export function ChatBot() {
   };
 
   const handleRequestCall = () => {
-    // Store chat context for the appointment form
     const chatContext = messages
       .filter(m => m.role === "user")
       .map(m => m.content)
       .join(" | ");
-    
+
     sessionStorage.setItem("chatContext", chatContext);
     navigate("/rendez-vous");
   };
@@ -143,7 +199,7 @@ export function ChatBot() {
                     <Bot className="size-6 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Assistant MusicPro</CardTitle>
+                    <CardTitle className="text-lg">Assistant LabConnect</CardTitle>
                     <div className="flex items-center gap-2 mt-1">
                       <div className="size-2 bg-green-500 rounded-full animate-pulse" />
                       <CardDescription className="text-xs">En ligne</CardDescription>
@@ -164,8 +220,8 @@ export function ChatBot() {
                   className={`flex gap-3 ${message.role === "user" ? "flex-row-reverse" : "flex-row"}`}
                 >
                   <div className={`size-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    message.role === "user" 
-                      ? "bg-blue-600" 
+                    message.role === "user"
+                      ? "bg-blue-600"
                       : "bg-gradient-to-br from-purple-500 to-indigo-600"
                   }`}>
                     {message.role === "user" ? (
@@ -184,9 +240,9 @@ export function ChatBot() {
                       <p className={`text-xs mt-1 ${
                         message.role === "user" ? "text-blue-100" : "text-slate-500"
                       }`}>
-                        {message.timestamp.toLocaleTimeString("fr-FR", { 
-                          hour: "2-digit", 
-                          minute: "2-digit" 
+                        {message.timestamp.toLocaleTimeString("fr-FR", {
+                          hour: "2-digit",
+                          minute: "2-digit"
                         })}
                       </p>
                     </div>
@@ -213,7 +269,7 @@ export function ChatBot() {
             </CardContent>
 
             <CardFooter className="border-t p-4">
-              <form 
+              <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleSendMessage();
@@ -245,12 +301,20 @@ export function ChatBot() {
               <CardTitle className="text-lg">Actions rapides</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button 
+              <Button
                 onClick={handleRequestCall}
                 className="w-full gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
               >
                 <Phone className="size-4" />
                 Demander un appel
+              </Button>
+              <Button
+                onClick={handleRequestCall}
+                variant="outline"
+                className="w-full gap-2"
+              >
+                <FileText className="size-4" />
+                Demander un devis
               </Button>
               <p className="text-xs text-slate-500 text-center">
                 Échangez avec un expert en 15 minutes
@@ -262,7 +326,7 @@ export function ChatBot() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <Music className="size-5" />
+                <FlaskConical className="size-5" />
                 Questions fréquentes
               </CardTitle>
             </CardHeader>
@@ -286,7 +350,7 @@ export function ChatBot() {
               <Bot className="size-10 mb-3 opacity-80" />
               <h3 className="font-bold mb-2">Besoin d'aide ?</h3>
               <p className="text-sm text-slate-300 mb-4">
-                Notre IA est là pour répondre à toutes vos questions. Si besoin, nous vous mettons en contact avec un expert.
+                Notre assistant répond à vos questions sur nos équipements et vos demandes de devis. Si besoin, nous vous mettons en contact avec un expert.
               </p>
               <div className="flex items-center gap-2 text-xs text-slate-400">
                 <div className="size-2 bg-green-400 rounded-full animate-pulse" />

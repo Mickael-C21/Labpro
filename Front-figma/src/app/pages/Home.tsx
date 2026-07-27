@@ -8,24 +8,24 @@ import {
   Search,
   MapPin,
   Sparkles,
-  Guitar,
-  Piano,
-  Drum,
-  Wind,
-  Music,
-  Mic
+  FlaskConical,
+  Snowflake,
+  Scale,
+  Armchair,
+  Microscope,
+  Droplet
 } from "lucide-react";
 
 const heroImage =
-  "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=1800&q=80";
+  "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1800&q=80";
 
 const categories = [
-  { id: "guitares", name: "Guitares", icon: Guitar },
-  { id: "pianos", name: "Pianos", icon: Piano },
-  { id: "batteries", name: "Batteries", icon: Drum },
-  { id: "vents", name: "Vents", icon: Wind },
-  { id: "cordes", name: "Cordes", icon: Music },
-  { id: "studio", name: "Studio", icon: Mic }
+  { id: "autoclaves", name: "Autoclaves", icon: FlaskConical },
+  { id: "refrigeration", name: "Réfrigération", icon: Snowflake },
+  { id: "balances", name: "Balances", icon: Scale },
+  { id: "mobilier", name: "Mobilier", icon: Armchair },
+  { id: "analyseurs", name: "Analyseurs", icon: Microscope },
+  { id: "purification", name: "Purification d'eau", icon: Droplet }
 ];
 
 export function Home() {
@@ -49,16 +49,16 @@ export function Home() {
         <div className="w-full text-center lg:text-left lg:max-w-3xl">
           <span className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-white/90 px-4 py-2 text-sm font-medium text-purple-700 shadow-sm mb-6">
             <Sparkles className="size-4" />
-            Louez, comparez et trouvez le bon son
+            Comparez et équipez votre laboratoire
           </span>
 
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
-            Trouvez l'instrument idéal<br />pour votre passion musicale
+            Trouvez l'équipement idéal<br />pour votre laboratoire
           </h1>
 
           <p className="text-lg text-white/80 mb-10 max-w-2xl mx-auto lg:mx-0">
-            Découvrez et louez plus de 10 instruments professionnels, avec des recommandations
-            adaptées à vos besoins musicaux.
+            Découvrez plus de 20 équipements de laboratoire professionnels, avec des recommandations
+            adaptées à vos besoins.
           </p>
 
           <div className="mb-6">
@@ -67,7 +67,7 @@ export function Home() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
                 <Input
                   type="text"
-                  placeholder="Rechercher un instrument, une marque, un modèle..."
+                  placeholder="Rechercher un équipement, une marque, un modèle..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-12 pr-32 py-7 text-lg rounded-xl shadow-lg border-slate-200 bg-white/95 text-slate-900"
@@ -124,7 +124,7 @@ export function Home() {
             </div>
             <div>
               <div className="text-4xl font-bold text-white mb-1">40 000+</div>
-              <div className="text-sm text-white/75">Instruments vendus</div>
+              <div className="text-sm text-white/75">Équipements vendus</div>
             </div>
           </div>
         </div>

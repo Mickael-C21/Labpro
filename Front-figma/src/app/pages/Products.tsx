@@ -7,16 +7,16 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Input } from "../components/ui/input";
-import { Guitar, Piano, Drum, Wind, Music, Mic, Search, ShoppingCart } from "lucide-react";
+import { FlaskConical, Snowflake, Scale, Armchair, Microscope, Droplet, Search, ShoppingCart } from "lucide-react";
 
 const categories = [
   { id: "all", name: "Tous les produits", icon: ShoppingCart },
-  { id: "guitares", name: "Guitares", icon: Guitar },
-  { id: "pianos", name: "Pianos & Claviers", icon: Piano },
-  { id: "batteries", name: "Batteries", icon: Drum },
-  { id: "vents", name: "Instruments à Vent", icon: Wind },
-  { id: "cordes", name: "Instruments à Cordes", icon: Music },
-  { id: "studio", name: "Studio & Production", icon: Mic }
+  { id: "autoclaves", name: "Autoclaves", icon: FlaskConical },
+  { id: "refrigeration", name: "Réfrigération", icon: Snowflake },
+  { id: "balances", name: "Balances", icon: Scale },
+  { id: "mobilier", name: "Mobilier de Laboratoire", icon: Armchair },
+  { id: "analyseurs", name: "Analyseurs", icon: Microscope },
+  { id: "purification", name: "Purification d'Eau", icon: Droplet }
 ];
 
 export function Products() {
@@ -55,7 +55,7 @@ export function Products() {
           Notre Catalogue
         </h1>
         <p className="text-lg text-slate-600">
-          Découvrez notre sélection d'instruments de qualité professionnelle
+          Découvrez notre sélection d'équipements de laboratoire de qualité professionnelle
         </p>
       </div>
 

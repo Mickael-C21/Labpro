@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { Home, ArrowLeft, Music } from "lucide-react";
+import { Home, ArrowLeft, FlaskConical } from "lucide-react";
 
 export function NotFound() {
   return (
@@ -9,7 +9,7 @@ export function NotFound() {
       <Card className="max-w-md w-full">
         <CardContent className="p-12 text-center">
           <div className="bg-gradient-to-br from-purple-600 to-indigo-600 p-4 rounded-full w-fit mx-auto mb-6">
-            <Music className="size-12 text-white" />
+            <FlaskConical className="size-12 text-white" />
           </div>
           
           <h1 className="text-6xl font-bold text-slate-900 mb-4">404</h1>

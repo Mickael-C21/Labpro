@@ -1,101 +1,129 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 
 interface User {
-  id: string;
+  id: number;
   email: string;
   name: string;
+  phone: string;
   role: "client" | "admin";
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string, role: "client" | "admin") => Promise<boolean>;
-  register: (name: string, email: string, password: string) => Promise<boolean>;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, phone: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  updateProfile: (name: string, phone: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Simulation d'une base de données en mémoire
-const registeredUsers: User[] = [
-  {
-    id: "1",
-    email: "client@test.fr",
-    name: "Client Test",
-    role: "client"
-  }
-];
-
-const adminUsers: User[] = [
-  {
-    id: "admin-1",
-    email: "admin@test.fr",
-    name: "Admin Test",
-    role: "admin"
-  }
-];
+const API_BASE_URL = "http://127.0.0.1:8000";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const register = async (name: string, email: string, password: string): Promise<boolean> => {
-    // Vérifier si l'email existe déjà
-    const emailExists = registeredUsers.some(u => u.email === email);
-    if (emailExists) {
-      return false;
-    }
-
-    // Créer le nouvel utilisateur
-    const newUser: User = {
-      id: `user-${Date.now()}`,
-      email,
-      name,
-      role: "client"
+  // Restore session from token on app load
+  useEffect(() => {
+    const restoreSession = async () => {
+      const token = localStorage.getItem("access_token");
+      if (token) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/me`, {
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json"
+            }
+          });
+          if (response.ok) {
+            const userData = await response.json();
+            setUser(userData);
+          } else {
+            localStorage.removeItem("access_token");
+          }
+        } catch (error) {
+          console.error("Error restoring session:", error);
+          localStorage.removeItem("access_token");
+        }
+      }
+      setLoading(false);
     };
 
-    // L'ajouter à notre "base de données"
-    registeredUsers.push(newUser);
+    restoreSession();
+  }, []);
 
-    // Connecter automatiquement l'utilisateur
-    setUser(newUser);
+  const register = async (name: string, email: string, password: string, phone: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ name, email, password, phone })
+    });
 
-    return true;
-  };
-
-  const login = async (email: string, password: string, role: "client" | "admin"): Promise<boolean> => {
-    // Simulation d'authentification
-    // Dans une vraie application, vous appelleriez votre API ici
-
-    if (role === "client") {
-      // Chercher dans les utilisateurs enregistrés
-      const foundUser = registeredUsers.find(u => u.email === email);
-      if (foundUser) {
-        setUser(foundUser);
-        return true;
-      }
-    } else if (role === "admin") {
-      // Chercher dans les admins
-      const foundAdmin = adminUsers.find(u => u.email === email);
-      if (foundAdmin) {
-        setUser(foundAdmin);
-        return true;
-      }
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || "Registration failed");
     }
 
-    return false;
+    const userData = await response.json();
+    setUser(userData);
+  };
+
+  const login = async (email: string, password: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || "Login failed");
+    }
+
+    const data = await response.json();
+    localStorage.setItem("access_token", data.access_token);
+    setUser(data.user);
   };
 
   const logout = () => {
+    localStorage.removeItem("access_token");
     setUser(null);
+  };
+
+  const updateProfile = async (name: string, phone: string): Promise<void> => {
+    const token = localStorage.getItem("access_token");
+    if (!token) throw new Error("Not authenticated");
+
+    const response = await fetch(`${API_BASE_URL}/me`, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ name, phone })
+    });
+
+    if (!response.ok) {
+      throw new Error("Profile update failed");
+    }
+
+    const updatedUser = await response.json();
+    setUser(updatedUser);
   };
 
   const isAuthenticated = user !== null;
   const isAdmin = user?.role === "admin";
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isAuthenticated, isAdmin }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, isAuthenticated, isAdmin, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

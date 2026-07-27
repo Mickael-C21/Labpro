@@ -22,14 +22,10 @@ export function AdminLogin() {
     setIsLoading(true);
 
     try {
-      const success = await login(email, password, "admin");
-      if (success) {
-        navigate("/admin/dashboard");
-      } else {
-        setError("Email ou mot de passe incorrect");
-      }
-    } catch (err) {
-      setError("Une erreur s'est produite");
+      await login(email, password);
+      navigate("/admin/dashboard");
+    } catch (err: any) {
+      setError(err.message || "Email ou mot de passe incorrect");
     } finally {
       setIsLoading(false);
     }

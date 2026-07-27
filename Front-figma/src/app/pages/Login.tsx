@@ -6,7 +6,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { Music2, Lock, Mail, ArrowRight } from "lucide-react";
+import { FlaskConical, Lock, Mail, ArrowRight } from "lucide-react";
 
 export function Login() {
   const [email, setEmail] = useState("");
@@ -22,14 +22,10 @@ export function Login() {
     setIsLoading(true);
 
     try {
-      const success = await login(email, password, "client");
-      if (success) {
-        navigate("/produits");
-      } else {
-        setError("Email ou mot de passe incorrect");
-      }
-    } catch (err) {
-      setError("Une erreur s'est produite");
+      await login(email, password);
+      navigate("/produits");
+    } catch (err: any) {
+      setError(err.message || "Email ou mot de passe incorrect");
     } finally {
       setIsLoading(false);
     }
@@ -40,7 +36,7 @@ export function Login() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full mb-4">
-            <Music2 className="size-8 text-white" />
+            <FlaskConical className="size-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-slate-900 mb-2">
             Espace Client

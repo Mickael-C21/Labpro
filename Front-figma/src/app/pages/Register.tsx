@@ -6,12 +6,13 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { Music2, Lock, Mail, ArrowRight, User } from "lucide-react";
+import { FlaskConical, Lock, Mail, ArrowRight, User, Phone } from "lucide-react";
 
 export function Register() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: ""
   });
@@ -25,7 +26,7 @@ export function Register() {
     setError("");
 
     // Validation
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+    if (!formData.name || !formData.email || !formData.phone || !formData.password || !formData.confirmPassword) {
       setError("Tous les champs sont obligatoires");
       return;
     }
@@ -43,14 +44,10 @@ export function Register() {
     setIsLoading(true);
 
     try {
-      const success = await register(formData.name, formData.email, formData.password);
-      if (success) {
-        navigate("/produits");
-      } else {
-        setError("Cet email est déjà utilisé");
-      }
-    } catch (err) {
-      setError("Une erreur s'est produite lors de l'inscription");
+      await register(formData.name, formData.email, formData.password, formData.phone);
+      navigate("/produits");
+    } catch (err: any) {
+      setError(err.message || "Une erreur s'est produite lors de l'inscription");
     } finally {
       setIsLoading(false);
     }
@@ -61,13 +58,13 @@ export function Register() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full mb-4">
-            <Music2 className="size-8 text-white" />
+            <FlaskConical className="size-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-slate-900 mb-2">
             Créer un compte
           </h1>
           <p className="text-slate-600">
-            Rejoignez MusicPro pour accéder à nos produits
+            Rejoignez LabConnect pour accéder à nos produits
           </p>
         </div>
 
@@ -112,6 +109,22 @@ export function Register() {
                     placeholder="votre@email.fr"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="pl-10"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone">Téléphone</Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="+33 6 12 34 56 78"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     className="pl-10"
                     required
                   />

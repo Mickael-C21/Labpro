@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router";
-import { Music, ShoppingBag, Calendar, Home as HomeIcon, Layout as LayoutIcon, User, Shield, LogOut } from "lucide-react";
+import { FlaskConical, ShoppingBag, Calendar, Home as HomeIcon, User, Shield, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "../context/AuthContext";
 import { Badge } from "./ui/badge";
@@ -13,15 +13,15 @@ export function Layout() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-        <div className="mx-auto max-w-6xl px-4 py-4">
+        <div className="mx-auto max-w-[1400px] px-6 py-4">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
               <div className="bg-gradient-to-br from-purple-600 to-indigo-600 p-2 rounded-lg">
-                <Music className="size-6 text-white" />
+                <FlaskConical className="size-6 text-white" />
               </div>
               <div>
-                <h1 className="font-bold text-xl text-slate-900">MusicPro</h1>
-                <p className="text-xs text-slate-500">Vos instruments, notre passion</p>
+                <h1 className="font-bold text-xl text-slate-900">LabConnect</h1>
+                <p className="text-xs text-slate-500">Votre laboratoire, notre expertise</p>
               </div>
             </Link>
 
@@ -122,15 +122,15 @@ export function Layout() {
       </header>
 
       {/* Main Content */}
-      <main className={isHomePage ? "w-full px-0 py-0" : "container mx-auto px-4 py-8"}>
+      <main className={isHomePage ? "w-full px-0 py-0" : "mx-auto max-w-[1400px] px-6 py-8"}>
         <Outlet />
       </main>
 
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 mt-16">
-        <div className="container mx-auto px-4 py-6">
+        <div className="mx-auto max-w-[1400px] px-6 py-6">
           <div className="text-center text-sm text-slate-500">
-            <p>© 2026 MusicPro - Votre expert en instruments de musique</p>
+            <p>© 2026 LabConnect - Votre expert en équipements de laboratoire</p>
           </div>
         </div>
       </footer>
