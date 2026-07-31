@@ -17,7 +17,8 @@ import {
 } from "lucide-react";
 
 const heroImage =
-  "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1800&q=80";
+  "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1800&q=80";
+
 
 const categories = [
   { id: "autoclaves", name: "Autoclaves", icon: FlaskConical },
@@ -47,7 +48,7 @@ export function Home() {
 
       <div className="relative z-10 mx-auto flex min-h-[calc(100vh-200px)] w-full max-w-6xl items-center px-4 text-white">
         <div className="w-full text-center lg:text-left lg:max-w-3xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-white/90 px-4 py-2 text-sm font-medium text-purple-700 shadow-sm mb-6">
+          <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/90 px-4 py-2 text-sm font-medium text-blue-950 shadow-sm mb-6">
             <Sparkles className="size-4" />
             Comparez et équipez votre laboratoire
           </span>
@@ -108,7 +109,7 @@ export function Home() {
           </div>
 
           <div className="mb-14">
-            <Link to="/produits" className="text-purple-300 hover:text-purple-200 font-medium text-sm">
+            <Link to="/produits" className="text-blue-400 hover:text-blue-200 font-medium text-sm">
               Recherche avancée →
             </Link>
           </div>
@@ -133,26 +134,26 @@ export function Home() {
         <div className="fixed bottom-8 right-8 z-50">
           <div className="bg-slate-900 text-white p-4 rounded-2xl shadow-2xl max-w-xs mb-4">
             <div className="flex items-start gap-3">
-              <div className="bg-purple-600 p-2 rounded-lg">
+              <div className="bg-blue-900 p-2 rounded-lg">
                 <Sparkles className="size-5" />
               </div>
               <div className="text-left">
                 <p className="font-semibold mb-1">Besoin d'aide pour choisir ?</p>
                 <p className="text-sm text-slate-300">
-                  Nos experts sont disponibles pour vous conseiller par téléphone. Planifiez un appel dès maintenant !
+                  Discutez avec notre assistant pour trouver l'équipement adapté, ou passez directement par un conseiller.
                 </p>
               </div>
             </div>
-            <Link to="/rendez-vous">
+            <Link to="/chat">
               <Button variant="secondary" size="sm" className="w-full mt-3">
                 Parler à un expert
               </Button>
             </Link>
           </div>
-          <Link to="/rendez-vous">
+          <Link to="/chat">
             <Button
               size="lg"
-              className="rounded-full w-16 h-16 shadow-2xl bg-purple-600 hover:bg-purple-700"
+              className="rounded-full w-16 h-16 shadow-2xl bg-blue-900 hover:bg-blue-950"
             >
               <Sparkles className="size-6" />
             </Button>

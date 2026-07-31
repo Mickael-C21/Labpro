@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router";
+import { useNavigate, useLocation, Link } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -20,6 +20,8 @@ export function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.from || "/produits";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +47,7 @@ export function Register() {
 
     try {
       await register(formData.name, formData.email, formData.password, formData.phone);
-      navigate("/produits");
+      navigate(redirectTo);
     } catch (err: any) {
       setError(err.message || "Une erreur s'est produite lors de l'inscription");
     } finally {
@@ -57,14 +59,16 @@ export function Register() {
     <div className="min-h-[calc(100vh-200px)] flex items-center justify-center">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-800 to-slate-800 rounded-full mb-4">
             <FlaskConical className="size-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-slate-900 mb-2">
             Créer un compte
           </h1>
           <p className="text-slate-600">
-            Rejoignez LabConnect pour accéder à nos produits
+            {redirectTo === "/rendez-vous"
+              ? "Créez votre compte pour réserver un créneau avec un agent"
+              : "Rejoignez LabConnect pour accéder à nos produits"}
           </p>
         </div>
 
@@ -172,7 +176,7 @@ export function Register() {
               <div className="text-center pt-4 border-t">
                 <p className="text-sm text-slate-600">
                   Vous avez déjà un compte ?{" "}
-                  <Link to="/login" className="text-purple-600 hover:text-purple-700 font-medium">
+                  <Link to="/login" state={{ from: redirectTo }} className="text-blue-900 hover:text-blue-950 font-medium">
                     Se connecter
                   </Link>
                 </p>

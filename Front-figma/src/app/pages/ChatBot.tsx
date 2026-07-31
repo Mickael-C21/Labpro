@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
+import { useAuth } from "../context/AuthContext";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -43,6 +44,10 @@ const categoryKeywords: { id: string; label: string; keywords: string[] }[] = [
 ];
 
 const quoteKeywords = ["devis", "prix", "tarif", "coût", "cout", "budget", "combien"];
+const warrantyKeywords = ["garantie", "sav", "panne", "casse"];
+const shippingKeywords = ["livraison", "délai", "delai", "expédition", "expedition"];
+const hoursKeywords = ["horaire", "ouvert", "disponib", "quand", "joignable"];
+const contactKeywords = ["contact", "téléphone", "telephone", "email", "mail", "adresse"];
 const dissatisfactionKeywords = [
   "non", "pas satisf", "pas utile", "pas la réponse", "pas ce que", "autre chose",
   "ça ne répond pas", "ca ne repond pas", "insatisf", "toujours pas", "ce n'est pas ça"
@@ -63,7 +68,7 @@ function generateReply(userMessage: string): BotReply {
   const isDissatisfied = dissatisfactionKeywords.some((kw) => lowerMessage.includes(kw));
   if (isDissatisfied) {
     return {
-      text: "Je comprends, je ne veux pas vous faire perdre de temps. Le plus simple est qu'un de nos conseillers vous appelle directement pour répondre précisément à votre besoin. Cliquez sur « Demander un appel » ci-contre, ou dites-moi le sujet et je prépare la demande avec vous. 📞",
+      text: "Je comprends, je ne veux pas vous faire perdre de temps. Le plus simple est qu'un de nos conseillers vous appelle directement pour répondre précisément à votre besoin. Cliquez sur le bouton ci-contre, ou dites-moi le sujet et je prépare la demande avec vous. 📞",
       matched: true
     };
   }
@@ -92,9 +97,37 @@ function generateReply(userMessage: string): BotReply {
     };
   }
 
+  if (warrantyKeywords.some((kw) => lowerMessage.includes(kw))) {
+    return {
+      text: "Tous nos équipements sont couverts par une garantie de 2 ans, avec un retour gratuit en cas de défaut. Pour un problème sur un équipement déjà livré, un conseiller peut prendre en charge votre dossier SAV directement. Voulez-vous être mis en relation ?",
+      matched: true
+    };
+  }
+
+  if (shippingKeywords.some((kw) => lowerMessage.includes(kw))) {
+    return {
+      text: "Les délais de livraison varient selon l'équipement et la disponibilité en stock — en général entre 3 et 10 jours ouvrés en France métropolitaine. Un conseiller peut vous confirmer le délai exact pour le produit qui vous intéresse.",
+      matched: true
+    };
+  }
+
+  if (hoursKeywords.some((kw) => lowerMessage.includes(kw))) {
+    return {
+      text: "Cet assistant est disponible 24/7. Nos conseillers, eux, sont joignables par téléphone du lundi au vendredi, 9h-18h. Vous pouvez aussi demander un appel immédiat ou programmer un créneau qui vous convient.",
+      matched: true
+    };
+  }
+
+  if (contactKeywords.some((kw) => lowerMessage.includes(kw))) {
+    return {
+      text: "Le plus simple pour être contacté directement est de demander un appel via le bouton ci-contre — un conseiller vous rappelle sous peu, ou au créneau que vous choisissez.",
+      matched: true
+    };
+  }
+
   // Default response when nothing was recognized
   return {
-    text: "C'est une excellente question ! Pour vous donner la meilleure réponse possible, dites-moi si cela concerne un type d'équipement précis (autoclave, réfrigération, balance, mobilier, analyseur, purification d'eau) ou une demande de devis. Sinon, je vous propose de vous mettre en relation avec un expert. Souhaitez-vous planifier un appel de 15 minutes ? 📞",
+    text: "C'est une excellente question ! Pour vous donner la meilleure réponse possible, dites-moi si cela concerne un type d'équipement précis (autoclave, réfrigération, balance, mobilier, analyseur, purification d'eau), un devis, une livraison, une garantie ou un horaire. Sinon, je vous propose de vous mettre en relation avec un expert. Souhaitez-vous planifier un appel de 15 minutes ? 📞",
     matched: false
   };
 }
@@ -102,6 +135,7 @@ function generateReply(userMessage: string): BotReply {
 export function ChatBot() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const category = location.state?.category;
 
   const initialMessages: ChatMessage[] = [
@@ -153,7 +187,9 @@ export function ChatBot() {
       // Après 2 réponses sans correspondance claire, on pousse fortement vers le RDV
       const finalText =
         nextUnmatched >= 2
-          ? "Je n'arrive pas à identifier précisément votre besoin par ici. Le plus efficace est qu'un conseiller vous rappelle directement — cliquez sur « Demander un appel » ci-contre, je vous y redirige tout de suite. 📞"
+          ? (user
+              ? "Je n'arrive pas à identifier précisément votre besoin par ici. Le plus efficace est qu'un conseiller vous rappelle directement — cliquez sur « Demander un appel » ci-contre, je vous y redirige tout de suite. 📞"
+              : "Je n'arrive pas à identifier précisément votre besoin par ici. Le plus efficace est qu'un conseiller vous rappelle directement — créez un compte en un instant via le bouton ci-contre, vous pourrez ensuite réserver un créneau avec un agent. 📞")
           : reply.text;
 
       const assistantMessage: ChatMessage = {
@@ -183,7 +219,13 @@ export function ChatBot() {
       .join(" | ");
 
     sessionStorage.setItem("chatContext", chatContext);
-    navigate("/rendez-vous");
+
+    if (!user) {
+      // Le client doit d'abord créer un compte pour réserver un créneau
+      navigate("/register", { state: { from: "/rendez-vous" } });
+    } else {
+      navigate("/rendez-vous");
+    }
   };
 
   return (
@@ -195,7 +237,7 @@ export function ChatBot() {
             <CardHeader className="border-b">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="bg-gradient-to-br from-purple-500 to-indigo-600 p-2 rounded-lg">
+                  <div className="bg-gradient-to-br from-blue-800 to-slate-800 p-2 rounded-lg">
                     <Bot className="size-6 text-white" />
                   </div>
                   <div>
@@ -222,7 +264,7 @@ export function ChatBot() {
                   <div className={`size-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                     message.role === "user"
                       ? "bg-blue-600"
-                      : "bg-gradient-to-br from-purple-500 to-indigo-600"
+                      : "bg-gradient-to-br from-blue-800 to-slate-800"
                   }`}>
                     {message.role === "user" ? (
                       <User className="size-4 text-white" />
@@ -252,7 +294,7 @@ export function ChatBot() {
 
               {isTyping && (
                 <div className="flex gap-3">
-                  <div className="size-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+                  <div className="size-8 rounded-full bg-gradient-to-br from-blue-800 to-slate-800 flex items-center justify-center flex-shrink-0">
                     <Bot className="size-4 text-white" />
                   </div>
                   <div className="bg-slate-100 p-3 rounded-lg">
@@ -303,10 +345,10 @@ export function ChatBot() {
             <CardContent className="space-y-3">
               <Button
                 onClick={handleRequestCall}
-                className="w-full gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
+                className="w-full gap-2 bg-gradient-to-r from-blue-800 to-slate-600 hover:from-blue-900 hover:to-slate-700"
               >
                 <Phone className="size-4" />
-                Demander un appel
+                {user ? "Demander un appel" : "Créer un compte pour réserver"}
               </Button>
               <Button
                 onClick={handleRequestCall}
@@ -317,7 +359,9 @@ export function ChatBot() {
                 Demander un devis
               </Button>
               <p className="text-xs text-slate-500 text-center">
-                Échangez avec un expert en 15 minutes
+                {user
+                  ? "Échangez avec un expert en 15 minutes"
+                  : "Compte gratuit, en moins d'une minute"}
               </p>
             </CardContent>
           </Card>
@@ -336,7 +380,7 @@ export function ChatBot() {
                   key={idx}
                   onClick={() => handleQuickQuestion(question)}
                   disabled={isTyping}
-                  className="w-full text-left p-3 rounded-lg border border-slate-200 hover:border-purple-300 hover:bg-purple-50 transition-all text-sm disabled:opacity-50"
+                  className="w-full text-left p-3 rounded-lg border border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-all text-sm disabled:opacity-50"
                 >
                   {question}
                 </button>
