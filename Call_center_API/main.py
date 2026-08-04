@@ -4,6 +4,7 @@ from typing import List, Optional
 from jose import JWTError
 import json
 import model, schema, auth
+import seed_products
 from database import SessionLocal, engine
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -141,16 +142,40 @@ def ensure_default_agents(db: Session):
     """Create default agents if none exist"""
     if db.query(model.Agent).count() == 0:
         db.add_all([
-            model.Agent(name="Agent Thomas", email="thomas@musicpro.fr"),
-            model.Agent(name="Agent Sophie", email="sophie@musicpro.fr"),
+            model.Agent(name="Agent Thomas", email="thomas@labconnect.fr"),
+            model.Agent(name="Agent Sophie", email="sophie@labconnect.fr"),
         ])
         db.commit()
+
+
+def ensure_default_products(db: Session):
+    """Peuple la table produits avec les données de démo si elle est vide"""
+    if db.query(model.Product).count() == 0:
+        seed_products.run()
+
+
+def ensure_default_admin(db: Session):
+    """Crée un administrateur de démonstration si aucun admin n'existe."""
+    if db.query(model.User).filter(model.User.role == "admin").count() == 0:
+        admin_email = "admin@test.fr"
+        admin_password = "admin123"
+        if not db.query(model.User).filter(model.User.email == admin_email).first():
+            db.add(model.User(
+                name="Admin LabConnect",
+                email=admin_email,
+                password=auth.hash_password(admin_password),
+                phone="0000000000",
+                role="admin"
+            ))
+            db.commit()
 
 
 @app.on_event("startup")
 def startup():
     db = SessionLocal()
     ensure_default_agents(db)
+    ensure_default_admin(db)
+    ensure_default_products(db)
     db.close()
 
 
@@ -263,6 +288,31 @@ def add_feedback(id: int, data: schema.Feedback, current_user: model.User = Depe
     call.feedback = data.feedback
     call.result = data.result
     call.status = "done"
+
+    db.commit()
+    db.refresh(call)
+
+    return call
+
+
+@app.patch("/calls/{id}", response_model=schema.CallOut)
+def update_call(id: int, update: schema.CallCreate, current_user: model.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Mise à jour partielle d'un appel : statut et/ou notes de l'agent.
+    Réservé aux admins (les clients ne modifient pas leurs propres rendez-vous)."""
+    call = db.query(model.Call).filter(model.Call.id == id).first()
+
+    if not call:
+        raise HTTPException(status_code=404, detail="Call not found")
+
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+
+    if update.status is not None:
+        call.status = update.status
+    if update.feedback is not None:
+        call.feedback = update.feedback
+    if update.result is not None:
+        call.result = update.result
 
     db.commit()
     db.refresh(call)

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type ChangeEvent } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../components/ui/card";
@@ -52,18 +52,124 @@ const dissatisfactionKeywords = [
   "non", "pas satisf", "pas utile", "pas la réponse", "pas ce que", "autre chose",
   "ça ne répond pas", "ca ne repond pas", "insatisf", "toujours pas", "ce n'est pas ça"
 ];
+const recommendationKeywords = [
+  "quel",
+  "quelle",
+  "lequel",
+  "laquelle",
+  "recommande",
+  "recommander",
+  "conseilles",
+  "conseil",
+  "conseiller",
+  "meilleur",
+  "meilleure",
+  "mieux",
+  "top"
+];
+const alternativeKeywords = [
+  "autre",
+  "autres",
+  "différent",
+  "different",
+  "moins cher",
+  "plus cher",
+  "équivalent",
+  "equivalent",
+  "pareil",
+  "meme",
+  "même",
+  "modèle",
+  "modele",
+  "variantes",
+  "variante",
+  "le même",
+  "le meme",
+  "même",
+  "semblable",
+  "similar"
+];
+const comparisonKeywords = [
+  "moins cher",
+  "plus cher",
+  "équivalent",
+  "equivalent",
+  "similaire",
+  "semblable",
+  "même",
+  "pareil"
+];
+const detailKeywords = [
+  "détails",
+  "details",
+  "detail",
+  "précis",
+  "precis",
+  "spécifique",
+  "specifique",
+  "en savoir plus",
+  "plus d'information",
+  "plus d info",
+  "plus d infos"
+];
 
 interface BotReply {
   text: string;
   matched: boolean;
 }
 
+const categoryRecommendations: Record<string, string> = {
+  autoclaves: "Pour un usage standard, je recommande l'Autoclave de Laboratoire Vertical 50L. Si vous avez besoin d'une machine compacte, optez pour l'Autoclave de Paillasse 24L. Pour de grandes quantités, le modèle Autoclave Industriel 100L est le meilleur choix.",
+  refrigeration: "Je vous conseille le Réfrigérateur de Laboratoire 300L pour la plupart des besoins. Si vous avez besoin de conserver des échantillons à très basse température, prenez le Congélateur -40°C Vertical 200L. Pour un poste de travail, la Chambre Froide de Paillasse 50L est idéale.",
+  balances: "Pour la pesée fine, la Balance Analytique de Précision 0,1mg est excellente. Pour des mesures courantes, choisissez la Balance de Précision 0,01g. Si vous devez compter des pièces, la Balance Compteuse Industrielle est la plus adaptée.",
+  mobilier: "Je recommande le Banc de Travail de Laboratoire Inox pour les postes de paillasse, l'Armoire de Stockage de Sécurité pour les produits chimiques, et la Chaise Ergonomique de Laboratoire pour le confort du personnel.",
+  analyseurs: "Pour des cultures et analyses courantes, l'Incubateur de Laboratoire 150L est un bon choix. Pour la séparation d'échantillons, choisissez la Centrifugeuse de Laboratoire 4000 RPM. Le Bain-Marie de Laboratoire Numérique est idéal pour la régulation de température. Les analyseurs TOC et d'humidité servent aux contrôles qualité spécifiques.",
+  purification: "Le Système de Purification d'Eau Type II est adapté aux besoins habituels de laboratoire. Pour des analyses exigeantes, le Système de Purification d'Eau Ultra-Pure Type I est préférable. Si vous voulez préparer l'eau en amont, l'Osmoseur de Laboratoire est le bon choix."
+};
+
+function findCategoryFromConversation(messages: ChatMessage[]) {
+  const combined = messages.map((message) => message.content).join(" ").toLowerCase();
+  return findCategory(combined);
+}
+
+function getRecommendation(categoryId: string) {
+  return categoryRecommendations[categoryId] || "Je peux vous recommander un produit adapté si vous me dites le type d'équipement souhaité : autoclave, réfrigération, balance, mobilier, analyseur ou purification d'eau.";
+}
+
 function findCategory(message: string) {
   return categoryKeywords.find((cat) => cat.keywords.some((kw) => message.includes(kw)));
 }
 
-function generateReply(userMessage: string): BotReply {
+const categoryInfo: Record<string, { description: string; priceRange: string }> = {
+  autoclaves: {
+    description: "Nous proposons des autoclaves de paillasse, verticales et industrielles pour les laboratoires, cabinets dentaires et sites hospitaliers.",
+    priceRange: "à partir de 1 290€ pour les modèles compacts et jusqu'à 4 890€ pour les grandes capacités industrielles"
+  },
+  refrigeration: {
+    description: "Nos solutions couvrent les réfrigérateurs médicaux, congélateurs -40°C et chambres froides de paillasse.",
+    priceRange: "de 890€ à 2 990€ selon la capacité et le niveau de contrôle de température"
+  },
+  balances: {
+    description: "Vous trouverez des balances analytiques, des balances de précision et des balances compteuses adaptées aux laboratoires et à l'industrie.",
+    priceRange: "de 349€ à 890€ selon la précision et les fonctionnalités"
+  },
+  mobilier: {
+    description: "Nous proposons des bancs de travail, armoires de sécurité et sièges ergonomiques pour équiper vos postes de laboratoire.",
+    priceRange: "de 219€ à 1 190€ selon l'équipement"
+  },
+  analyseurs: {
+    description: "Nos analyseurs incluent centrifugeuses, incubateurs, bains-marie et analyseurs TOC/humidité.",
+    priceRange: "de 490€ à 6 990€ selon les spécifications"
+  },
+  purification: {
+    description: "Nos systèmes de purification d'eau de type I et II ainsi que nos osmoseurs couvrent les besoins de laboratoire.",
+    priceRange: "de 990€ à 2 790€ selon la pureté et le débit"
+  }
+};
+
+function generateReply(userMessage: string, conversationCategory?: { id: string; label: string; keywords: string[] }): BotReply {
   const lowerMessage = userMessage.toLowerCase();
+  const category = findCategory(lowerMessage) || conversationCategory;
 
   const isDissatisfied = dissatisfactionKeywords.some((kw) => lowerMessage.includes(kw));
   if (isDissatisfied) {
@@ -73,12 +179,35 @@ function generateReply(userMessage: string): BotReply {
     };
   }
 
+  const recommendationIntent = recommendationKeywords.some((kw) => lowerMessage.includes(kw));
   const wantsQuote = quoteKeywords.some((kw) => lowerMessage.includes(kw));
-  const category = findCategory(lowerMessage);
+  const alternativeIntent = alternativeKeywords.some((kw) => lowerMessage.includes(kw));
+
+  if (recommendationIntent && category) {
+    return {
+      text: `Pour votre besoin en ${category.label}, je vous conseille ${getRecommendation(category.id).split('.')[0]}. Si vous voulez, je peux aussi vous donner une estimation de prix et préparer un devis pour ce produit.`,
+      matched: true
+    };
+  }
+
+  if (alternativeIntent && category) {
+    return {
+      text: `Si vous cherchez une autre option en ${category.label}, je vous propose une alternative adaptée à vos besoins. ${getRecommendation(category.id)} Souhaitez-vous que je vous envoie un devis ou que je vous détaille les caractéristiques principales ?`,
+      matched: true
+    };
+  }
+
+  if (recommendationIntent) {
+    return {
+      text: `D'accord. Je peux vous aider à choisir le meilleur équipement pour votre laboratoire. Vous cherchez plutôt un autoclave, une solution de réfrigération, une balance, du mobilier, un analyseur ou un système de purification d'eau ?`,
+      matched: true
+    };
+  }
 
   if (wantsQuote && category) {
+    const info = categoryInfo[category.id];
     return {
-      text: `Avec plaisir ! Pour établir un devis précis sur nos ${category.label}, j'ai besoin de connaître le modèle qui vous intéresse et votre usage (capacité, fréquence d'utilisation...). Je peux vous mettre en relation avec un conseiller qui vous enverra un devis personnalisé sous 24h. Souhaitez-vous demander un appel ou programmer un rendez-vous ? 📞`,
+      text: `Avec plaisir ! Pour établir un devis précis sur nos ${category.label}, j'ai besoin de connaître le modèle qui vous intéresse ainsi que votre usage (capacité, fréquence d'utilisation...). ${info.description} En général, nos offres sont ${info.priceRange}. Je peux vous mettre en relation avec un conseiller qui vous enverra un devis personnalisé sous 24h. Souhaitez-vous demander un appel ou programmer un rendez-vous ? 📞`,
       matched: true
     };
   }
@@ -91,8 +220,9 @@ function generateReply(userMessage: string): BotReply {
   }
 
   if (category) {
+    const info = categoryInfo[category.id];
     return {
-      text: `Concernant nos ${category.label}, je peux vous donner des informations générales, comparer des modèles, ou établir un devis personnalisé. Que préférez-vous : en savoir plus sur les modèles disponibles, ou obtenir un devis ?`,
+      text: `Concernant nos ${category.label}, ${info.description} En règle générale, les prix vont ${info.priceRange}. ${getRecommendation(category.id)} Que préférez-vous : en savoir plus sur les modèles disponibles, ou obtenir un devis ?`,
       matched: true
     };
   }
@@ -175,14 +305,19 @@ export function ChatBot() {
       timestamp: new Date()
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev: ChatMessage[]) => [...prev, userMessage]);
     setInputValue("");
     setIsTyping(true);
 
     setTimeout(() => {
-      const reply = generateReply(text);
-      const nextUnmatched = reply.matched ? 0 : unmatchedCount + 1;
-      setUnmatchedCount(nextUnmatched);
+      const conversationCategory = findCategoryFromConversation([...messages, userMessage]);
+      const reply = generateReply(text, conversationCategory);
+      let nextUnmatched = 0;
+
+      setUnmatchedCount((prevCount: number) => {
+        nextUnmatched = reply.matched ? 0 : prevCount + 1;
+        return nextUnmatched;
+      });
 
       // Après 2 réponses sans correspondance claire, on pousse fortement vers le RDV
       const finalText =
@@ -199,7 +334,7 @@ export function ChatBot() {
         timestamp: new Date()
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev: ChatMessage[]) => [...prev, assistantMessage]);
       setIsTyping(false);
 
       if (nextUnmatched >= 2) {
@@ -214,8 +349,8 @@ export function ChatBot() {
 
   const handleRequestCall = () => {
     const chatContext = messages
-      .filter(m => m.role === "user")
-      .map(m => m.content)
+      .filter((m: ChatMessage) => m.role === "user")
+      .map((m: ChatMessage) => m.content)
       .join(" | ");
 
     sessionStorage.setItem("chatContext", chatContext);
@@ -256,7 +391,7 @@ export function ChatBot() {
             </CardHeader>
 
             <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.map((message) => (
+              {messages.map((message: ChatMessage) => (
                 <div
                   key={message.id}
                   className={`flex gap-3 ${message.role === "user" ? "flex-row-reverse" : "flex-row"}`}
@@ -321,7 +456,7 @@ export function ChatBot() {
                 <Input
                   ref={inputRef}
                   value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setInputValue(e.target.value)}
                   placeholder="Posez votre question..."
                   disabled={isTyping}
                   className="flex-1"

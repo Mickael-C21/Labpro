@@ -2,8 +2,6 @@ import json
 from database import SessionLocal, engine
 import model
 
-model.Base.metadata.create_all(bind=engine)
-
 products = [
     # --- Autoclaves ---
     {
@@ -11,7 +9,7 @@ products = [
         "description": "Autoclave à vapeur pour la stérilisation d'instruments et de milieux de culture.",
         "category": "autoclaves",
         "price": 2490,
-        "image": "https://images.pexels.com/photos/8413159/pexels-photo-8413159.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1531340246822-65e19c2e121f?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Autoclave vertical en acier inoxydable 304 avec cuve de 50 litres, conçu pour la stérilisation fiable des instruments de laboratoire, de la verrerie et des milieux de culture. Cycles programmables et sécurité renforcée.",
         "in_stock": True,
         "brand": "LabSteril",
@@ -25,7 +23,7 @@ products = [
         "description": "Autoclave compact pour petits laboratoires et cabinets dentaires.",
         "category": "autoclaves",
         "price": 1290,
-        "image": "https://images.pexels.com/photos/6627664/pexels-photo-6627664.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1556228452-6e5d8c0a9e80?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Autoclave de paillasse compact, idéal pour les cabinets dentaires, vétérinaires et petits laboratoires. Cycle rapide et faible encombrement.",
         "in_stock": True,
         "brand": "LabSteril",
@@ -39,7 +37,7 @@ products = [
         "description": "Autoclave de grande capacité pour la stérilisation industrielle.",
         "category": "autoclaves",
         "price": 4890,
-        "image": "https://images.pexels.com/photos/6627665/pexels-photo-6627665.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Autoclave de grande capacité destiné aux laboratoires industriels et hospitaliers nécessitant des volumes de stérilisation importants.",
         "in_stock": True,
         "brand": "LabSteril",
@@ -55,7 +53,7 @@ products = [
         "description": "Réfrigérateur médical à température régulée pour réactifs et échantillons.",
         "category": "refrigeration",
         "price": 1690,
-        "image": "https://images.pexels.com/photos/8940466/pexels-photo-8940466.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Réfrigérateur de laboratoire à régulation précise de température, adapté à la conservation de réactifs, vaccins et échantillons biologiques.",
         "in_stock": True,
         "brand": "LabCold",
@@ -69,7 +67,7 @@ products = [
         "description": "Congélateur basse température pour la conservation longue durée d'échantillons.",
         "category": "refrigeration",
         "price": 2990,
-        "image": "https://images.pexels.com/photos/8442027/pexels-photo-8442027.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1571168547429-5abfc36d5987?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Congélateur vertical atteignant -40°C, conçu pour la conservation longue durée d'échantillons biologiques et de réactifs sensibles.",
         "in_stock": True,
         "brand": "LabCold",
@@ -83,7 +81,7 @@ products = [
         "description": "Petite enceinte réfrigérée pour la conservation d'échantillons au poste de travail.",
         "category": "refrigeration",
         "price": 890,
-        "image": "https://images.pexels.com/photos/32769363/pexels-photo-32769363.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1470123808288-9a0418d7c5b6?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Enceinte réfrigérée compacte destinée à la conservation immédiate d'échantillons directement au poste de travail.",
         "in_stock": True,
         "brand": "LabCold",
@@ -99,7 +97,7 @@ products = [
         "description": "Balance analytique haute précision pour la pesée en laboratoire.",
         "category": "balances",
         "price": 890,
-        "image": "https://images.pexels.com/photos/9574512/pexels-photo-9574512.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Balance analytique offrant une précision de 0,1 mg, adaptée aux laboratoires de chimie, pharmacie et contrôle qualité.",
         "in_stock": True,
         "brand": "LabWeight",
@@ -113,7 +111,7 @@ products = [
         "description": "Balance robuste pour les pesées courantes en laboratoire.",
         "category": "balances",
         "price": 349,
-        "image": "https://images.pexels.com/photos/8940480/pexels-photo-8940480.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Balance de précision destinée aux pesées courantes en laboratoire, robuste et facile à utiliser au quotidien.",
         "in_stock": True,
         "brand": "LabWeight",
@@ -127,7 +125,7 @@ products = [
         "description": "Balance dédiée au comptage de pièces et composants.",
         "category": "balances",
         "price": 590,
-        "image": "https://images.pexels.com/photos/9243559/pexels-photo-9243559.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1519892300165-cb5542fb47c7?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Balance compteuse permettant le dénombrement rapide et précis de petites pièces en environnement industriel ou de laboratoire.",
         "in_stock": True,
         "brand": "LabWeight",
@@ -143,7 +141,7 @@ products = [
         "description": "Table de travail en acier inoxydable pour paillasse de laboratoire.",
         "category": "mobilier",
         "price": 790,
-        "image": "https://images.pexels.com/photos/18471461/pexels-photo-18471461.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1558981285-8b8e3ad2f09f?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Banc de travail en acier inoxydable, résistant à la corrosion et facile à nettoyer, adapté à un usage intensif en laboratoire.",
         "in_stock": True,
         "brand": "LabFurn",
@@ -157,7 +155,7 @@ products = [
         "description": "Armoire ventilée pour le stockage de produits chimiques.",
         "category": "mobilier",
         "price": 1190,
-        "image": "https://images.pexels.com/photos/7723540/pexels-photo-7723540.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1581092322736-2f0e860c5ccb?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Armoire de sécurité ventilée destinée au stockage conforme de produits chimiques et de réactifs sensibles.",
         "in_stock": True,
         "brand": "LabFurn",
@@ -171,7 +169,7 @@ products = [
         "description": "Siège réglable pensé pour un usage prolongé en laboratoire.",
         "category": "mobilier",
         "price": 219,
-        "image": "https://images.pexels.com/photos/8540819/pexels-photo-8540819.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Chaise ergonomique réglable en hauteur, conçue pour le confort du personnel de laboratoire lors de sessions prolongées.",
         "in_stock": True,
         "brand": "LabFurn",
@@ -187,7 +185,7 @@ products = [
         "description": "Centrifugeuse polyvalente pour la séparation d'échantillons.",
         "category": "analyseurs",
         "price": 1590,
-        "image": "https://images.pexels.com/photos/8442029/pexels-photo-8442029.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1581093458791-9d42e3f6b0f7?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Centrifugeuse de laboratoire atteignant 4000 tr/min, adaptée à la séparation d'échantillons biologiques et chimiques.",
         "in_stock": True,
         "brand": "LabSpin",
@@ -201,7 +199,7 @@ products = [
         "description": "Incubateur à température régulée pour cultures cellulaires et microbiologiques.",
         "category": "analyseurs",
         "price": 1990,
-        "image": "https://images.pexels.com/photos/8533136/pexels-photo-8533136.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1622398925373-3f91b1e275f5?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Incubateur offrant une régulation précise de température et d'humidité, adapté aux cultures cellulaires et microbiologiques.",
         "in_stock": True,
         "brand": "LabGrow",
@@ -215,7 +213,7 @@ products = [
         "description": "Bain-marie à régulation numérique pour incubations et réactions contrôlées.",
         "category": "analyseurs",
         "price": 490,
-        "image": "https://images.pexels.com/photos/9629714/pexels-photo-9629714.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1575936123452-b67c3203c357?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Bain-marie de laboratoire à régulation numérique de température, adapté aux incubations et réactions contrôlées.",
         "in_stock": True,
         "brand": "LabGrow",
@@ -229,7 +227,7 @@ products = [
         "description": "Analyseur de carbone organique total pour le contrôle qualité de l'eau.",
         "category": "analyseurs",
         "price": 6990,
-        "image": "https://images.pexels.com/photos/7298558/pexels-photo-7298558.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1568667256549-09482d0c5fe6?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Analyseur TOC destiné au contrôle qualité de l'eau, utilisé en pharmacie, agroalimentaire et environnement.",
         "in_stock": True,
         "brand": "LabAnalyse",
@@ -243,7 +241,7 @@ products = [
         "description": "Analyseur de taux d'humidité par dessiccation infrarouge.",
         "category": "analyseurs",
         "price": 990,
-        "image": "https://images.pexels.com/photos/18689301/pexels-photo-18689301.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Analyseur d'humidité par dessiccation infrarouge, rapide et précis, adapté aux contrôles qualité en agroalimentaire et pharmacie.",
         "in_stock": True,
         "brand": "LabAnalyse",
@@ -259,7 +257,7 @@ products = [
         "description": "Purificateur d'eau de laboratoire pour usages courants.",
         "category": "purification",
         "price": 1390,
-        "image": "https://images.pexels.com/photos/36926327/pexels-photo-36926327.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Système de purification d'eau de type II, adapté à la préparation de réactifs et au nettoyage de verrerie en laboratoire.",
         "in_stock": True,
         "brand": "LabPure",
@@ -273,7 +271,7 @@ products = [
         "description": "Purificateur haute performance pour applications analytiques exigeantes.",
         "category": "purification",
         "price": 2790,
-        "image": "https://images.pexels.com/photos/8940364/pexels-photo-8940364.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Système de purification d'eau ultra-pure de type I, destiné aux applications analytiques et de recherche les plus exigeantes.",
         "in_stock": True,
         "brand": "LabPure",
@@ -287,7 +285,7 @@ products = [
         "description": "Système d'osmose inverse pour la préproduction d'eau de laboratoire.",
         "category": "purification",
         "price": 990,
-        "image": "https://images.pexels.com/photos/8325948/pexels-photo-8325948.jpeg?auto=compress&cs=tinysrgb&w=1024",
+        "image": "https://images.unsplash.com/photo-1555255396-3561c197e64c?auto=format&fit=crop&w=1024&q=80",
         "long_description": "Système d'osmose inverse permettant la préproduction d'eau à partir de l'eau du réseau, en amont des systèmes de purification.",
         "in_stock": True,
         "brand": "LabPure",
@@ -298,9 +296,16 @@ products = [
     },
 ]
 
-with SessionLocal() as db:
-    db.query(model.Product).delete(synchronize_session=False)
-    for product_data in products:
-        db.add(model.Product(**product_data))
-    db.commit()
-    print(f"Ajouté {len(products)} produits dans la base.")
+def run():
+    """Vide la table produits et la repeuple avec les données de démo."""
+    model.Base.metadata.create_all(bind=engine)
+    with SessionLocal() as db:
+        db.query(model.Product).delete(synchronize_session=False)
+        for product_data in products:
+            db.add(model.Product(**product_data))
+        db.commit()
+        print(f"Ajouté {len(products)} produits dans la base.")
+
+
+if __name__ == "__main__":
+    run()
