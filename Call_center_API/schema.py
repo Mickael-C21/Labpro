@@ -94,6 +94,11 @@ class CallCreate(BaseModel):
     subject: Optional[str] = None
     scheduled_at: Optional[datetime] = None
 
+class CallUpdate(BaseModel):
+    status: Optional[str] = None
+    feedback: Optional[str] = None
+    result: Optional[str] = None
+
 class CallOut(BaseModel):
     id: int
     user_id: int

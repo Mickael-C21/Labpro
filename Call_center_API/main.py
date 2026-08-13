@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -14,11 +15,16 @@ model.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 # CORS (React)
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "").split(",")
+allowed_origins = [origin.strip() for origin in allowed_origins if origin.strip()]
+if not allowed_origins:
+    allowed_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=False,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -78,7 +84,7 @@ def get_current_user(authorization: Optional[str] = Header(None), db: Session = 
 
 # ---- AUTH ----
 
-@app.post("/register", response_model=schema.UserOut)
+@app.post("/register")
 def register(user: schema.UserCreate, db: Session = Depends(get_db)):
     existing = db.query(model.User).filter(model.User.email == user.email).first()
     if existing:
@@ -97,7 +103,16 @@ def register(user: schema.UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    return new_user
+    token = auth.create_token({
+        "user_id": new_user.id,
+        "role": new_user.role
+    })
+
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": schema.UserOut.model_validate(new_user)
+    }
 
 
 @app.post("/login")
@@ -157,9 +172,9 @@ def ensure_default_products(db: Session):
 def ensure_default_admin(db: Session):
     """Crée un administrateur de démonstration si aucun admin n'existe."""
     if db.query(model.User).filter(model.User.role == "admin").count() == 0:
-        admin_email = "admin@test.fr"
-        admin_password = "admin123"
-        if not db.query(model.User).filter(model.User.email == admin_email).first():
+        admin_email = os.getenv("DEFAULT_ADMIN_EMAIL", "admin@test.fr")
+        admin_password = os.getenv("DEFAULT_ADMIN_PASSWORD", "admin123")
+        if admin_email and admin_password and not db.query(model.User).filter(model.User.email == admin_email).first():
             db.add(model.User(
                 name="Admin LabConnect",
                 email=admin_email,
@@ -296,7 +311,7 @@ def add_feedback(id: int, data: schema.Feedback, current_user: model.User = Depe
 
 
 @app.patch("/calls/{id}", response_model=schema.CallOut)
-def update_call(id: int, update: schema.CallCreate, current_user: model.User = Depends(get_current_user), db: Session = Depends(get_db)):
+def update_call(id: int, update: schema.CallUpdate, current_user: model.User = Depends(get_current_user), db: Session = Depends(get_db)):
     """Mise à jour partielle d'un appel : statut et/ou notes de l'agent.
     Réservé aux admins (les clients ne modifient pas leurs propres rendez-vous)."""
     call = db.query(model.Call).filter(model.Call.id == id).first()
@@ -328,6 +343,21 @@ def get_users(current_user: model.User = Depends(get_current_user), db: Session 
         raise HTTPException(status_code=403, detail="Admin only")
     
     return db.query(model.User).all()
+
+
+@app.get("/admin/stats")
+def admin_stats(current_user: model.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+
+    return {
+        "total_users": db.query(model.User).count(),
+        "total_products": db.query(model.Product).count(),
+        "total_calls": db.query(model.Call).count(),
+        "pending_calls": db.query(model.Call).filter(model.Call.status == "pending").count(),
+        "completed_calls": db.query(model.Call).filter(model.Call.status == "completed").count(),
+        "cancelled_calls": db.query(model.Call).filter(model.Call.status == "cancelled").count(),
+    }
 
 
 @app.get("/users/{id}")

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
+import { apiGet } from "../../../api";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -23,8 +24,6 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-
-const API_BASE_URL = "http://127.0.0.1:8000";
 
 interface Call {
   id: number;
@@ -202,26 +201,8 @@ export function AppointmentTracking() {
     }
 
     const fetchCalls = async () => {
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        setError("Vous devez être connecté pour voir vos rendez-vous");
-        setLoading(false);
-        return;
-      }
-
       try {
-        const response = await fetch(`${API_BASE_URL}/calls`, {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error("Erreur lors du chargement de vos rendez-vous");
-        }
-
-        const data = await response.json();
+        const data = await apiGet<Call[]>("/calls");
         setCalls(data);
       } catch (err) {
         setError("Erreur lors du chargement de vos rendez-vous");

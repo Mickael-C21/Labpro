@@ -35,7 +35,7 @@ export function Products() {
 
   useEffect(() => {
     setLoading(true);
-    apiGet("/products")
+    apiGet<Product[]>("/products")
       .then((data) => setProducts(data))
       .catch((err) => console.error("Failed to load products:", err))
       .finally(() => setLoading(false));

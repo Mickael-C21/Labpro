@@ -1,10 +1,15 @@
-﻿const API_URL = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000";
+﻿const API_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
-function getAuthToken() {
+type JsonValue = string | number | boolean | null | JsonObject | JsonValue[];
+interface JsonObject {
+  [key: string]: JsonValue;
+}
+
+function getAuthToken(): string | null {
   return localStorage.getItem("access_token");
 }
 
-async function apiFetch(path: string, options: RequestInit = {}) {
+async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_URL}${path}`;
   const headers = new Headers(options.headers ?? {});
 
@@ -35,25 +40,25 @@ async function apiFetch(path: string, options: RequestInit = {}) {
     throw new Error(errorMessage);
   }
 
-  return text ? JSON.parse(text) : null;
+  return text ? JSON.parse(text) : (null as unknown as T);
 }
 
-export async function apiGet(path: string) {
-  return apiFetch(path, { method: "GET" });
+export async function apiGet<T>(path: string) {
+  return apiFetch<T>(path, { method: "GET" });
 }
 
-export async function apiPost(path: string, body: any) {
-  return apiFetch(path, { method: "POST", body: JSON.stringify(body) });
+export async function apiPost<T>(path: string, body: JsonObject) {
+  return apiFetch<T>(path, { method: "POST", body: JSON.stringify(body) });
 }
 
-export async function apiPut(path: string, body: any) {
-  return apiFetch(path, { method: "PUT", body: JSON.stringify(body) });
+export async function apiPut<T>(path: string, body: JsonObject) {
+  return apiFetch<T>(path, { method: "PUT", body: JSON.stringify(body) });
 }
 
-export async function apiPatch(path: string, body: any) {
-  return apiFetch(path, { method: "PATCH", body: JSON.stringify(body) });
+export async function apiPatch<T>(path: string, body: JsonObject) {
+  return apiFetch<T>(path, { method: "PATCH", body: JSON.stringify(body) });
 }
 
-export async function apiDelete(path: string) {
-  return apiFetch(path, { method: "DELETE" });
+export async function apiDelete<T>(path: string) {
+  return apiFetch<T>(path, { method: "DELETE" });
 }
