@@ -296,26 +296,12 @@ products = [
     },
 ]
 
-# Default images per category: override product images on seeding so they better match categories
-CATEGORY_IMAGES = {
-    "autoclaves": "https://images.unsplash.com/photo-1581093588401-9a1f7b3a6c1a?auto=format&fit=crop&w=1024&q=80",
-    "refrigeration": "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1024&q=80",
-    "balances": "https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=1024&q=80",
-    "mobilier": "https://images.unsplash.com/photo-1598300056280-8f5e9b8d0bb6?auto=format&fit=crop&w=1024&q=80",
-    "analyseurs": "https://images.unsplash.com/photo-1580281657521-5a3a8f5f0c8b?auto=format&fit=crop&w=1024&q=80",
-    "purification": "https://images.unsplash.com/photo-1580910051078-8d8f9b0b6d9b?auto=format&fit=crop&w=1024&q=80",
-}
-
 def run():
     """Vide la table produits et la repeuple avec les données de démo."""
     model.Base.metadata.create_all(bind=engine)
     with SessionLocal() as db:
         db.query(model.Product).delete(synchronize_session=False)
         for product_data in products:
-            # ensure a category-appropriate image when seeding
-            cat = product_data.get("category")
-            if cat in CATEGORY_IMAGES:
-                product_data["image"] = CATEGORY_IMAGES[cat]
             db.add(model.Product(**product_data))
         db.commit()
         print(f"Ajouté {len(products)} produits dans la base.")

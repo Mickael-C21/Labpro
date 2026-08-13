@@ -174,13 +174,12 @@ def ensure_default_admin(db: Session):
     if db.query(model.User).filter(model.User.role == "admin").count() == 0:
         admin_email = os.getenv("DEFAULT_ADMIN_EMAIL", "admin@test.fr")
         admin_password = os.getenv("DEFAULT_ADMIN_PASSWORD", "admin123")
-        admin_phone = os.getenv("DEFAULT_ADMIN_PHONE", "0000000000")
         if admin_email and admin_password and not db.query(model.User).filter(model.User.email == admin_email).first():
             db.add(model.User(
                 name="Admin LabConnect",
                 email=admin_email,
                 password=auth.hash_password(admin_password),
-                phone=admin_phone,
+                phone="0000000000",
                 role="admin"
             ))
             db.commit()
@@ -240,38 +239,32 @@ def create_product(product: schema.ProductCreate, db: Session = Depends(get_db))
 
 @app.post("/calls", response_model=schema.CallOut)
 def create_call(call: schema.CallCreate, current_user: model.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    try:
-        # Auto-assign agent (round-robin or random from 2 default agents)
+    # Auto-assign agent (round-robin or random from 2 default agents)
+    agents = db.query(model.Agent).all()
+    if not agents:
+        ensure_default_agents(db)
         agents = db.query(model.Agent).all()
-        if not agents:
-            ensure_default_agents(db)
-            agents = db.query(model.Agent).all()
-        
-        agent = agents[0] if agents else None  # Simple assignment: first agent
-        
-        new_call = model.Call(
-            user_id=current_user.id,
-            product_id=call.product_id,
-            agent_id=agent.id if agent else None,
-            call_type=call.call_type,
-            name=call.name,
-            phone=call.phone,
-            email=call.email,
-            subject=call.subject,
-            scheduled_at=call.scheduled_at,
-            status="pending"
-        )
+    
+    agent = agents[0] if agents else None  # Simple assignment: first agent
+    
+    new_call = model.Call(
+        user_id=current_user.id,
+        product_id=call.product_id,
+        agent_id=agent.id if agent else None,
+        call_type=call.call_type,
+        name=call.name,
+        phone=call.phone,
+        email=call.email,
+        subject=call.subject,
+        scheduled_at=call.scheduled_at,
+        status="pending"
+    )
 
-        db.add(new_call)
-        db.commit()
-        db.refresh(new_call)
+    db.add(new_call)
+    db.commit()
+    db.refresh(new_call)
 
-        return new_call
-    except Exception as e:
-        # Log server-side and return a readable HTTP error for debugging
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+    return new_call
 
 
 @app.get("/calls", response_model=List[schema.CallOut])
