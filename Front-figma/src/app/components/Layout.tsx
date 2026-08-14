@@ -131,6 +131,10 @@ export function Layout() {
         <div className="mx-auto max-w-[1400px] px-6 py-6">
           <div className="text-center text-sm text-slate-500">
             <p>© 2026 LabConnect - Votre expert en équipements de laboratoire</p>
+            <p className="mt-2">
+              <Link to="/cgu" className="text-slate-600 hover:text-slate-800 mr-3">CGU</Link>
+              <Link to="/mentions-legales" className="text-slate-600 hover:text-slate-800">Mentions légales</Link>
+            </p>
           </div>
         </div>
       </footer>
