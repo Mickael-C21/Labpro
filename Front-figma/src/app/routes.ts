@@ -10,6 +10,8 @@ import { AppointmentForm } from "./pages/AppointmentForm";
 import { AppointmentTracking } from "./pages/AppointmentTracking";
 import { ChatBot } from "./pages/ChatBot";
 import { NotFound } from "./pages/NotFound";
+import { CGU } from "./pages/CGU";
+import { MentionsLegales } from "./pages/MentionsLegales";
 import { Layout } from "./components/Layout";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
@@ -29,6 +31,8 @@ export const router = createBrowserRouter([
       { path: "rendez-vous", Component: AppointmentForm },
       { path: "chat", Component: ChatBot },
       { path: "mes-rendez-vous", Component: AppointmentTracking },
+      { path: "cgu", Component: CGU },
+      { path: "mentions-legales", Component: MentionsLegales },
       { path: "*", Component: NotFound },
     ],
   },
