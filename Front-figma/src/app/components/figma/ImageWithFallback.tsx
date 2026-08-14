@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 const ERROR_IMG_SRC =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODgiIGhlaWdodD0iODgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBvcGFjaXR5PSIuMyIgZmlsbD0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIzLjciPjxyZWN0IHg9IjE2IiB5PSIxNiIgd2lkdGg9IjU2IiBoZWlnaHQ9IjU2IiByeD0iNiIvPjxwYXRoIGQ9Im0xNiA1OCAxNi0xOCAzMiAzMiIvPjxjaXJjbGUgY3g9IjUzIiBjeT0iMzUiIHI9IjciLz48L3N2Zz4KCg=='
@@ -6,11 +6,25 @@ const ERROR_IMG_SRC =
 export function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElement>) {
   const [didError, setDidError] = useState(false)
 
-  const handleError = () => {
+  const handleError = (e?: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    // Log to help debug why certain URLs (eg. .png links) fail to load in some environments
+    try {
+      // eslint-disable-next-line no-console
+      console.warn('Image failed to load', (e && (e.target as HTMLImageElement)?.src) || props.src)
+    } catch {}
     setDidError(true)
   }
 
-  const { src, alt, style, className, ...rest } = props
+  const handleLoad = () => {
+    setDidError(false)
+  }
+
+  const { src, alt, style, className, onError, onLoad, ...rest } = props
+
+  // reset error state when src changes
+  useEffect(() => {
+    setDidError(false)
+  }, [src])
 
   return didError ? (
     <div
@@ -22,6 +36,6 @@ export function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElemen
       </div>
     </div>
   ) : (
-    <img src={src} alt={alt} className={className} style={style} {...rest} onError={handleError} />
+    <img src={src} alt={alt} className={className} style={style} {...rest} onError={(e) => { handleError(e); if (onError) onError(e as any); }} onLoad={(e) => { handleLoad(); if (onLoad) onLoad(e as any); }} />
   )
 }
