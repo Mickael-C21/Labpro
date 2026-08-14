@@ -100,15 +100,12 @@ export function Login() {
                 <ArrowRight className="size-4" />
               </Button>
 
-              <div className="text-center pt-4 border-t space-y-3">
+              <div className="text-center pt-4 border-t">
                 <p className="text-sm text-slate-600">
                   Pas encore de compte ?{" "}
                   <Link to="/register" state={{ from: redirectTo }} className="text-blue-900 hover:text-blue-950 font-medium">
                     Créer un compte
                   </Link>
-                </p>
-                <p className="text-xs text-slate-500">
-                  Compte de test : <code className="bg-slate-100 px-2 py-1 rounded">client@test.fr / client123</code>
                 </p>
               </div>
             </form>
